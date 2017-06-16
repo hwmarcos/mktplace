@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'algoliasearch_django',
     'login',
     'portal',
+    'billing',
 ]
 
 MIDDLEWARE = [
