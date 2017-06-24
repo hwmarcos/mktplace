@@ -13,7 +13,7 @@ class Order(models.Model):
     STATUS_CHOICES = (
         ('Pending', 'Pending'),
         ('Refused', 'Refused'),
-        ('Aproved', 'Aproved'),
+        ('Approved', 'Approved'),
     )
     status = models.CharField(choices=STATUS_CHOICES, max_length=10, default='Pending')
     SHIPMENT_STATUS_CHOICES = (

@@ -42,16 +42,16 @@
                     <div class="col-md-2 img-market-place-thumbnail">
 
                         <img id="thumbnailML" src="{% static 'img/01.jpg' %}" data-img="Imagem 01"
-                        alt="Tela 15.6">
+                             alt="Tela 15.6">
 
                         <img id="thumbnailML" src="{% static 'img/02.jpg' %}" data-img="Imagem 02"
-                        alt="Tela 15.6">
+                             alt="Tela 15.6">
 
                         <img id="thumbnailML" src="{% static 'img/03.jpg' %}" data-img="Imagem 03"
-                        alt="Tela 15.6">
+                             alt="Tela 15.6">
 
                         <img id="thumbnailML" src="{% static 'img/04.jpg' %}" data-img="Imagem 04"
-                        alt="Tela 15.6">
+                             alt="Tela 15.6">
 
                     </div>
 
@@ -166,11 +166,13 @@
                 <h2>Perguntas ao vendedor</h2>
             </header>
             <section class="section-questions-market-place-content">
+                {% if request.user.is_authenticated %}
                 <form class="questions-form" action="{% url 'product_new_question' product.id %}" method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-info">Perguntar</button>
                 </form>
+                {% endif %}
                 <ul class="ml-questions-list">
                     {% for q in questions %}
                     <li>

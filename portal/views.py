@@ -1,9 +1,11 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 
-from portal.forms import ProductForm, ProductQuestionForm, AnswerQuestionForm
-from portal.models import Product, Category, ProductQuestion, ProductAnswer
+from portal.forms import ProductForm, ProductQuestionForm, AnswerQuestionForm, UserForm, UserProfileForm
+from portal.models import Product, Category, ProductQuestion, ProductAnswer, UserProfile
 import algoliasearch_django as algoliasearch
 
 
@@ -16,6 +18,7 @@ def home(request):
     return render(request, 'portal/home.html', context)
 
 
+@login_required
 def my_products(request):
     products = Product.objects.filter(user=request.user)
     context = {
@@ -24,6 +27,7 @@ def my_products(request):
     return render(request, 'portal/my_products.html', context)
 
 
+@login_required
 def products_new(request):
     categories = Category.objects.all()
     if request.method == 'POST':
@@ -53,6 +57,7 @@ def products_new(request):
     return render(request, 'portal/products_new.html', context)
 
 
+@login_required
 def products_edit(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
 
@@ -93,6 +98,7 @@ def product_show(request, slug):
     return render(request, 'portal/product_show.html', context)
 
 
+@login_required
 def product_new_question(request, product_id):
     product = get_object_or_404(Product, id=product_id, status='Active')
 
@@ -109,6 +115,7 @@ def product_new_question(request, product_id):
     return redirect('product_show', product.slug)
 
 
+@login_required
 def product_question(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
 
@@ -119,6 +126,7 @@ def product_question(request, product_id):
     return render(request, 'portal/product_question.html', context)
 
 
+@login_required
 def product_answer_question(request, product_id, question_id):
     product = get_object_or_404(Product, pk=product_id)
     question = get_object_or_404(ProductQuestion, pk=question_id)
@@ -191,3 +199,46 @@ def search(request):
         'previous_page': previous_page
     }
     return render(request, 'portal/product_search.html', context)
+
+
+@login_required
+def my_data(request):
+    user = User.objects.get(pk=request.user.pk)
+    user_form = UserForm(instance=user)
+
+    try:
+        user_profile = UserProfile.objects.get(user=user)
+    except:
+        user_profile = UserProfile()
+        user_profile.user = user
+        user_profile.save()
+
+    profile_form = UserProfileForm(instance=user_profile)
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST)
+        profile_form = UserProfileForm(request.POST)
+        if user_form.is_valid() and profile_form.is_valid():
+            user.first_name = user_form.cleaned_data['first_name']
+            user.last_name = user_form.cleaned_data['last_name']
+            user.save()
+
+            user_profile.cpf = profile_form.cleaned_data['cpf']
+            user_profile.address = profile_form.cleaned_data['address']
+            user_profile.address2 = profile_form.cleaned_data['address2']
+            user_profile.number = profile_form.cleaned_data['number']
+            user_profile.district = profile_form.cleaned_data['district']
+            user_profile.city = profile_form.cleaned_data['city']
+            user_profile.state = profile_form.cleaned_data['state']
+            user_profile.country = profile_form.cleaned_data['country']
+            user_profile.zipcode = profile_form.cleaned_data['zipcode']
+            user_profile.phone = profile_form.cleaned_data['phone']
+            user_profile.remote_receiver_id = profile_form.cleaned_data['remote_receiver_id']
+            user_profile.save()
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    }
+
+    return render(request, 'portal/my_data.html', context)
